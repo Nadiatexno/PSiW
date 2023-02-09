@@ -1,0 +1,60 @@
+#### 1. Napisać program który tworzy dwa procesy – zapisujący do kolejki FIFO i odczytujący z niej napis „HALLO!”.
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+int main(){
+    int pdesk;
+    char buffer[20] = "hello from child 1";
+    mkfifo("/fifo", 0600);
+    pdesk = open("/fifo", O_WRONLY);
+    write(pdesk, buffer, 20);
+    close(pdesk);
+    
+} 
+#include <stdio.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+int main(){
+    int pdesk;
+    char buf[10];
+    pdesk = open("/fifo", O_RDONLY);
+    read(pdesk, buf, 10);
+    printf("odczytano: %s\n", buf);
+
+}
+
+#### 2. Zrealizować następujące potoki: • ls | wc 
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+int main(int argc, char* argv[]){
+int pdesk;
+mkfifo("/inf153945/zadanie2", 0600);
+if(fork() == 0){
+close(1);
+pdesk = open("/zadanie2", O_WRONLY); 
+execvp("ls", argv);
+}
+else{
+close(0);
+pdesk = open("/zadanie2", O_RDONLY);
+execlp("wc", "wc", 0);
+}
+}
