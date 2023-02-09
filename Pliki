@@ -1,0 +1,235 @@
+Zadania:
+###### 1. Napisz program kopiujący zawartość pliku o nazwie podanej jako pierwszy parametr do pliku którego nazwa podana jest jako drugi parametr
+
+#include <stdio.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <unistd.h>
+
+
+int main(int argc, char* argv[]){
+int fd, fd1, len, w,r;
+char buf[10];
+
+fd = open(argv[1], O_RDWR);
+printf("Open %d\n", fd);
+
+r = read(fd, buf, 10);
+printf("Read %d\n", r);
+
+fd1 = open(argv[2], O_RDWR, 0640);
+printf("Open %d\n", fd1);
+
+w = write(fd1, buf, 10);
+printf("Write %d\n", w);
+}
+
+##### 2. Napisz program zmieniający kolejność znaków w każdej linii pliku o nazwie podanej jako parametr.
+
+#include <stdio.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <unistd.h>
+
+
+int main(int argc, char* argv[]){
+int fd, fd1, len = 0, w;
+char buf[10], buffer;
+
+fd = open(argv[1], O_RDONLY);
+printf("Open %d\n", fd);
+
+fd1 = creat(".fd1", 0664);
+printf("Open %d\n", fd1);
+
+while(read(fd, &buffer, sizeof(buffer)) > 0){
+len++;
+if(buffer == '\n'){
+for(int i = len - 1; i > 0; i--){
+w = write(fd1, &buf[i],1);
+}
+w = write(fd1, "\n",1);
+len = 0;
+}
+buf[len] = buffer;
+}
+
+close(fd);
+close(fd1);
+
+fd = open(argv[1], O_WRONLY);
+fd1 = open(".fd1", O_RDONLY);
+lseek(fd1, 0, SEEK_SET);
+char cbuf[10];
+int byte, w1;
+
+while((byte = read(fd1, cbuf, 10)) > 0){
+w1 = write(fd, cbuf, byte);
+}
+}
+
+##### 3. Napisz program wyszukujący najdłuższą linię w pliku i podający ilość znaków w tej linii.
+
+#include <stdio.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <unistd.h>
+
+
+int main(int argc, char* argv[]){
+int file, len = 0, max_len = 0, r;
+char buffer;
+file = open(argv[1], O_RDONLY);
+while(read(file, &buffer, sizeof(buffer)) > 0) {
+    if(buffer != '\n') {
+    len++;
+    }
+      else{
+      if(len > max_len){
+        max_len = len;
+        }
+      len = 0;
+      }
+    }
+printf("Ilosc znakow: %d\n", max_len);
+}
+
+#### 4. Napisz program określający rozmiar pliku ( kilku plików o nazwach podanych jako parametry wejściowy)
+
+int main(int argc, char* argv[]){
+    int rozmiar, fd, i;
+
+for (i = 1; i < argc; i++){
+fd = open(argv[i], O_RDONLY);
+rozmiar = lseek(fd, 0, SEEK_END);
+printf("Rozmiar pliku %d - %d\n", i, rozmiar);
+} 
+}
+
+#### 5. Napisz procedurę kopiowania ostatnich 10 znaków, słów i ostatnich 10 linii jednego pliku do innego.
+
+#include <stdio.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <ctype.h>
+#define MAX 512
+
+int main(int argc, char* argv[]){
+int fd, fd1, len, w, r, loop, counter=0, rozmiar, all, nowe;
+    char buf[MAX];
+    char buffer;
+
+    fd = open(argv[1], O_RDWR);
+    all = lseek(fd, -10, SEEK_END);
+    r = read(fd, buf, 10);
+    fd1 = open(argv[2], O_RDWR, 0640);
+    w = write(fd1, buf, 10);
+    printf("\n");
+    rozmiar = lseek(fd, 0, SEEK_END);
+    
+for(int i = 1; i < rozmiar - 1; i++){
+if(counter < 10){
+all = lseek(fd, rozmiar-i, SEEK_SET);
+r = read(fd, &buffer, sizeof(buffer));
+if(buffer != '\n'){
+all = lseek(fd, rozmiar-2-i, SEEK_SET);
+}
+else{
+all = lseek(fd, rozmiar-2-i, SEEK_SET);
+counter++;
+}
+}
+}
+nowe = lseek(fd, all, SEEK_SET);
+printf("%d", nowe);
+r = read(fd, buf, MAX);
+w = write(fd1, buf, r);
+
+rozmiar = lseek(fd, 0, SEEK_END);
+counter = 0;
+    printf("\n");
+for(int i = 1; i < rozmiar - 1; i++){
+if(counter < 10){
+all = lseek(fd, rozmiar-i, SEEK_SET);
+r = read(fd, &buffer, sizeof(buffer));
+if(buffer != ' ' || buffer != '\n'){
+all = lseek(fd, rozmiar-2-i, SEEK_SET);
+}
+else{
+all = lseek(fd, rozmiar-2-i, SEEK_SET);
+counter++;
+}
+}
+}
+nowe = lseek(fd, all, SEEK_SET);
+printf("%d", nowe);
+r = read(fd, buf, MAX);
+w = write(fd1, buf, r);
+}
+
+##### 6. Napisz program do rozpoznawania czy plik o podanej nazwie jest plikiem tekstowym (plik tekstowy zawiera znaki o kodach 0-127 – można w tym celu 
+użyć funkcji isascii)
+
+int main(int argc, char* argv[]){
+    int x, fd, y;
+
+fd = open(argv[1], O_RDONLY);
+x = lseek(fd, 0, SEEK_END);
+y = isascii(x);
+printf("Rozmiar pliku %d", y);
+}
+
+
+#### 7. Napisz program, który w pliku o nazwie podanej jako ostatni argument zapisze połączoną zawartość wszystkich plików których nazwy zostały podane w linii
+poleceń przed ostatnim argumentem.
+
+#define MAX 512
+int main(int argc, char* argv[]){
+    int fd, fd1, w, r, all;
+char buf[MAX];
+fd1 = open(argv[argc-1], O_RDWR, 0640);
+for (int i = 1; i < argc-1; i++){
+fd = open(argv[i], O_RDWR);
+r = read(fd, buf, MAX);
+w = write(fd1, buf, r);
+}
+
+}
+///////////////////////////////////
+     rozmiar = lseek(fd, 0, SEEK_END);
+for (int i=1; i < rozmiar; i++){
+printf("counter %d\n", counter);
+if(counter <= 10){
+lseek(fd, rozmiar-i, SEEK_SET);
+r = read(fd, &buffer, sizeof(buffer));
+
+if(buffer != '\n'){
+lseek(fd, rozmiar-2-i, SEEK_SET);
+
+}
+else{
+lseek(fd, rozmiar-2-i, SEEK_SET);
+counter++;
+}
+w = write(fd1, &buffer, sizeof(buffer));
+}
+else{
+all = lseek(fd, 0, SEEK_CUR);
+
+}
+    }
+
